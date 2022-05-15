@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "Aneurysm-Detection"
+name = "aneurysm-detection"
 version = "0.1.0"
 description = ""
 authors = ["sudo-Boris <boris.meinardus00@gmail.com>"]
