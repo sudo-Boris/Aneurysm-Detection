@@ -5,7 +5,7 @@ description = ""
 authors = ["sudo-Boris <boris.meinardus00@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8, <3.11"
 appdirs = "^1.4.4"
 backcall = "^0.2.0"
 decorator = "^5.1.1"
@@ -49,6 +49,10 @@ typing-extensions = "^4.2.0"
 vtk = "^9.1.0"
 wcwidth = "^0.2.5"
 zipp = "^3.8.0"
+PyYAML = "^6.0"
+h5py = "^3.6.0"
+tensorflow-gpu = "^2.8.0"
+scikit-image = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.3.0", allow-prereleases = true}

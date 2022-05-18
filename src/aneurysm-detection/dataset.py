@@ -26,7 +26,7 @@ def load_dataloader(
     aneurysm_dataset = AeurysmDataset(data_path, cases)
 
     return DataLoader(
-        aneurysm_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=4
+        aneurysm_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
     )
 
 
