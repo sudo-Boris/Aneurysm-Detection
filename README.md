@@ -26,7 +26,7 @@ ANEURYSM-DETECTION
 └───src
     │   ...
 ```
-The 3DUnet_training data for testing the external repository can be downloaded fom [here](https://osf.io/9x3g2/).
+The 3DUnet_training data for testing the external repository can be downloaded fom [here](https://osf.io/9x3g2/) (Cell boundary predictions for lightsheet images of Arabidopsis thaliana lateral root).
 Our aneurysm dataset was privately shared.
 ### Poetry shell (virtual env)
 #### Install poetry
