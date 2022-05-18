@@ -2,6 +2,32 @@
 
 ## Setup
 
+### File structure
+Add a ***data*** folder into your locally cloned repository so that the directory structure looks similar to this:
+```
+ANEURYSM-DETECTION
+│   README.md
+│   pyproject.toml
+│   ...
+│
+└───data 
+│   │
+│   └───training
+│   │   │   ...
+│   │
+│   └───3DUnet_training
+│       │   ...
+│   
+└───externals
+│   │
+│   └───pytorch3dunet
+│       │   ...
+│   
+└───src
+    │   ...
+```
+The 3DUnet_training data for testing the external repository can be downloaded fom [here](https://osf.io/9x3g2/).
+Our aneurysm dataset was privately shared.
 ### Poetry shell (virtual env)
 #### Install poetry
 Follow the [poetry installation guide](https://python-poetry.org/docs/) to install poetry if not already installed.
