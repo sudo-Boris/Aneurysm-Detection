@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 from datetime import datetime
-from re import L
 
 import h5py
 import nibabel as nib
@@ -37,10 +36,10 @@ class Nifty_Converter:
         target_path=None,
         name=None,
         mode="r",
-        raw=np.zeros(256, 256, 220),
-        label=np.zeros(256, 256, 220),
+        raw=None,
+        label=None,
     ):
-        """Create and return a h5 file to target path with respective naming. Store raw and label data in the created h5 file.
+        """Create or read and return a h5 file to target path with respective naming. Store raw and label data in the created h5 file.
 
         Args:
             target_path (Path): Path where the hd5f files are to be saved. Defaults to None.
