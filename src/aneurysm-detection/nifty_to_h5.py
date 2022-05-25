@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+from datetime import datetime
 from re import L
 
 import h5py
@@ -20,7 +21,7 @@ class Nifty_Converter:
         """Convert nifty images into h5 format for training with 3DUNet. Save them to a target path.
 
         Args:
-            target_path (Path, optional): Path where the hd5f files are to be saved. Defaults to None.
+            target_path (Path): Path where the hd5f files are to be saved. Defaults to None.
         """
 
         assert target_path is not None, "No target path provided."
@@ -28,10 +29,34 @@ class Nifty_Converter:
         for raw_file, label_file in self.filepaths:
             name = self.get_file_name(raw_file)
             raw, label = self.nifty_to_numpy(raw_file, label_file)
-            f = self.handle_h5(target_path, name, mode="a", raw=raw, label=label)
+            self.handle_h5(target_path, name, mode="a", raw=raw, label=label)
             logging.info("Created file {}".format(name + ".h5"))
 
-    def handle_h5(self, target_path=None, name=None, mode="r", raw=None, label=None):
+    def handle_h5(
+        self,
+        target_path=None,
+        name=None,
+        mode="r",
+        raw=np.zeros(256, 256, 220),
+        label=np.zeros(256, 256, 220),
+    ):
+        """Create and return a h5 file to target path with respective naming. Store raw and label data in the created h5 file.
+
+        Args:
+            target_path (Path): Path where the hd5f files are to be saved. Defaults to None.
+            name (str, optional): Name of file. Defaults to None, which will datetime.now() as unique name.
+            mode (str, optional): Mode in which the h5 file is to be accessed. Defaults to "r". If the file doesn't exist and has to be created -> "a", otherwise "r" or "w".
+            raw (np.ndarray, optional): Raw image data. Defaults to np.zeros(256, 256, 220).
+            label (np.ndarray, optional): Labels for raw image. Defaults to np.zeros(256, 256, 220).
+
+        Returns:
+            f (h5py.File): Created hdf5 file.
+        """
+        assert target_path is not None, "No target path provided."
+
+        if name is None:
+            name = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+
         target_file = os.path.join(target_path, name + ".h5")
         f = h5py.File(target_file, mode)
         if mode != "r":
@@ -52,7 +77,7 @@ class Nifty_Converter:
         return (raw_data, label_data)
 
 
-def test_read(case):
+def test_read(case=None):
     h5_file = os.path.join(os.getcwd(), "data", "h5", case + ".h5")
     f = h5py.File(h5_file, "r")
     raw = f["raw"][:]
@@ -68,14 +93,14 @@ def main():
 
     ### Specify the target directory where the h5 files are to be stored and start the conversion.
     ### In this case: /Aneurysm-Detection/data/h5
-    target_path = os.path.join(os.getcwd(), "data", "h5")
-    converter = Nifty_Converter(filepaths_raw, filepaths_masks)
-    converter.nifty_to_h5(target_path)
+    # target_path = os.path.join(os.getcwd(), "data", "h5")
+    # converter = Nifty_Converter(filepaths_raw, filepaths_masks)
+    # converter.nifty_to_h5(target_path)
 
     ### Test if you can correctly read the data out of the hdf5 file.
     ### The test_read function reads the data the same way the 3DUnet implementation does.
-    # raw, label = test_read(case="A003")
-    # print(raw)
+    raw, label = test_read(case="A003")
+    print(raw)
 
     logging.info("FINISHED")
 
