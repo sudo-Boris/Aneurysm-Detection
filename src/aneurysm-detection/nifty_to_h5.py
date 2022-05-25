@@ -93,14 +93,14 @@ def main():
 
     ### Specify the target directory where the h5 files are to be stored and start the conversion.
     ### In this case: /Aneurysm-Detection/data/h5
-    # target_path = os.path.join(os.getcwd(), "data", "h5")
-    # converter = Nifty_Converter(filepaths_raw, filepaths_masks)
-    # converter.nifty_to_h5(target_path)
+    target_path = os.path.join(os.getcwd(), "data", "h5")
+    converter = Nifty_Converter(filepaths_raw, filepaths_masks)
+    converter.nifty_to_h5(target_path)
 
     ### Test if you can correctly read the data out of the hdf5 file.
     ### The test_read function reads the data the same way the 3DUnet implementation does.
-    raw, label = test_read(case="A003")
-    print(raw)
+    # raw, label = test_read(case="A003")
+    # print(raw)
 
     logging.info("FINISHED")
 
