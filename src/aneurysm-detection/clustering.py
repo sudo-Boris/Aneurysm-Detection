@@ -6,11 +6,13 @@ import numpy.linalg as LA
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import sys
+import os
 
 sys.setrecursionlimit(60000)
+sys.path.append(os.path.join(sys.path[0], os.pardir, os.pardir)) 
 
 # read file data
-filename = "predictions/iteration2/A120_predictions.h5"
+filename = os.path.join("/home/emi/Uni/Master/SoSe_22/MIP/Aneurysm-Detection/src/aneurysm-detection", "predictions/iteration2/A120_predictions.h5")
 with h5py.File(filename, "r") as f:
     a_group_key = list(f.keys())[0]
     data = list(f[a_group_key])
@@ -70,6 +72,8 @@ def drawBoundingBox(ax, rrc):
     ax.plot(rrc[0, [2, 6]], rrc[1, [2, 6]], rrc[2, [2, 6]], color='b')
     ax.plot(rrc[0, [3, 7]], rrc[1, [3, 7]], rrc[2, [3, 7]], color='b')
 
+    #plt.show()
+
 def bbox_3D_2(centered_data):
     xmin, xmax, ymin, ymax, zmin, zmax = np.min(centered_data[0, :]), np.max(centered_data[0, :]), np.min(centered_data[1, :]), np.max(centered_data[1, :]), np.min(centered_data[2, :]), np.max(centered_data[2, :])
     return xmin, xmax, ymin, ymax, zmin, zmax
@@ -96,18 +100,21 @@ def compute_bounding_box(ax, tmpData):
     rrc = np.matmul(evec, rectCoords(xmin, ymin, zmin, xmax, ymax, zmax))
     rrc += means[:, np.newaxis] 
 
+    ax.scatter(cluster_data[0], cluster_data[1], cluster_data[2], c='green')
+
     drawBoundingBox(ax, rrc)
+    #return
 
 
 def find_cluster_start(ax, x,y,z):
-    tmp_array =[[[0]*220]*256]*256
+    tmp_array = np.zeros((256,256,220))
     tmp_array[x][y][z] = 1
     already_checked[x][y][z] = True
 
     tmp_array = recursive_cluster(tmp_array, x,y,z)
-    tmp_converted = np.array(tmp_array, dtype=object)
 
-    compute_bounding_box(ax, tmp_converted)
+    if(np.count_nonzero(tmp_array) > 1):
+        compute_bounding_box(ax, tmp_array)
 
 def recursive_cluster(tmp_array, x,y,z):
     for variant in modify_array:
