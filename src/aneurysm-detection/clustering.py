@@ -173,7 +173,7 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
 
-json_final = '"candidates" : ['
+json_final = '{"dataset_id": "XX", "processing_time_in_seconds": 1000, "candidates" : ['
 jsons = []
 
 for z in range(0,220):
@@ -188,10 +188,12 @@ for single_json in jsons:
     json_final += single_json
     json_final += ','
 
-json_final += "]"
-print(json_final)
+json_final += "]}"
+result = json_final
 
+with open('bounding_box.json', 'w') as outputfile:
+    outputfile.write(result)
+    
 original_data = np.where(newData == 1)
 ax.scatter(original_data[0], original_data[1], original_data[2], c='green')
 plt.show()
-
