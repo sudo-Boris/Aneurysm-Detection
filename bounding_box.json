@@ -1,0 +1,73 @@
+{
+    "username": "Bagel",
+    "task_1_results": [
+        {
+            "dataset_id": "A121",
+            "processing_time": 30.581696033477783,
+            "candidates": [
+                {
+                    "position": [
+                        38.8722,
+                        199.7553,
+                        58.3435
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -2.917,
+                                -3.711,
+                                0.3118
+                            ],
+                            [
+                                4.6655,
+                                -3.39,
+                                0.0
+                            ],
+                            [
+                                3.0015,
+                                -2.9726,
+                                -7.299
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        110.6018,
+                        128.5582,
+                        97.3748
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -10.8269,
+                                5.3147,
+                                -7.8756
+                            ],
+                            [
+                                -6.2363,
+                                -5.661,
+                                0.0
+                            ],
+                            [
+                                1.6823,
+                                -8.7566,
+                                -8.222
+                            ]
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
