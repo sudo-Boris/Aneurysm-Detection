@@ -84,23 +84,61 @@ def test_read(case=None):
     return (raw, label)
 
 
+def get_file_name(file_path=None):
+    # Some names are Axxx_L or Axxx_R. Those have to be included, otherwise names are onlz Axxx.
+    file_name = os.path.basename(file_path)[:6]
+    if file_name[4:] == "_L" or file_name[4:] == "_R" or file_name[4:] == "_M":
+        return file_name
+    return file_name[0:4]
+
+
+def h5_to_nifty(h5_files=None, target_path=None, threshold=0.9):
+    for h5_file in h5_files:
+        with h5py.File(h5_file, "r") as f:
+            pred = f["predictions"][:]
+        pred_np = np.squeeze(pred, axis=0)
+        if pred_np.shape == (220, 256, 256):
+            # reshape ds from z, x, y to x, y, z
+            pred_np = np.moveaxis(pred_np, 0, -1)
+        pred_np[pred_np > threshold] = 1
+        pred_np[pred_np <= threshold] = 0
+        target_file = os.path.join(
+            target_path, get_file_name(h5_file) + "_output" + ".nii.gz"
+        )
+        nib.save(nib.Nifti1Image(pred, np.eye(4)), target_file)
+        logging.INFO("Created file {}".format(target_file))
+
+
 def main():
     ### Get raw and mask images from (in this case) /Aneurysm-Detection/data/training
-    filepath_training = os.path.join(os.getcwd(), "data", "training")
-    filepaths_raw = sorted(glob.glob(os.path.join(filepath_training, "*_orig.*")))
-    filepaths_masks = sorted(glob.glob(os.path.join(filepath_training, "*_masks.*")))
+    # filepath_training = os.path.join(os.getcwd(), "data", "training")
+    # filepaths_raw = sorted(glob.glob(os.path.join(filepath_training, "*_orig.*")))
+    # filepaths_masks = sorted(glob.glob(os.path.join(filepath_training, "*_masks.*")))
 
     ### Specify the target directory where the h5 files are to be stored and start the conversion.
     ### In this case: /Aneurysm-Detection/data/h5
-    target_path = os.path.join(os.getcwd(), "data", "h5")
-    converter = Nifty_Converter(filepaths_raw, filepaths_masks)
-    converter.nifty_to_h5(target_path)
+    # target_path = os.path.join(os.getcwd(), "data", "h5")
+    # converter = Nifty_Converter(filepaths_raw, filepaths_masks)
+    # converter.nifty_to_h5(target_path)
 
     ### Test if you can correctly read the data out of the hdf5 file.
     ### The test_read function reads the data the same way the 3DUnet implementation does.
     # raw, label = test_read(case="A003")
     # print(raw)
 
+    filepath_final_predictions_dir = os.path.join(
+        os.getcwd(), "data", "predictions", "exam", "iteration5"
+    )
+    filepath_final_predictions = sorted(
+        glob.glob(os.path.join(filepath_final_predictions_dir, "*"))
+    )
+    # filepaths_masks = sorted(glob.glob(os.path.join(filepath_training, "*_masks.*")))
+
+    h5_to_nifty(
+        filepath_final_predictions,
+        os.path.join(os.getcwd(), "data", "predictions", "nifty"),
+        threshold=0.9,
+    )
     logging.info("FINISHED")
 
 

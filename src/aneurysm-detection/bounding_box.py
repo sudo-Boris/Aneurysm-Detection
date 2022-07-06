@@ -1,4 +1,8 @@
+import glob
+import logging
+from math import nan
 import os
+from pathlib import Path
 import time
 import h5py
 import numpy as np
@@ -7,7 +11,7 @@ import sys
 import os
 import json
 
-sys.setrecursionlimit(7000)
+sys.setrecursionlimit(50000)
 
 already_checked = np.full((256, 256, 220), False)
 
@@ -41,9 +45,9 @@ modify_array = [
 ]
 
 
-def get_pred_for_case(case: str, iteration: int, threshold: int = 0.8) -> np.ndarray:
+def get_pred_for_case(case: str, iteration: int, threshold: int = 0.9) -> np.ndarray:
     file = os.path.join(
-        "/Users/borismeinardus/Aneurysm-Detection/data/predictions",
+        "/home/borismeinardus/Aneurysm-Detection/data/predictions/exam",
         "iteration{}/{}_predictions.h5".format(iteration, case),
     )
 
@@ -57,6 +61,7 @@ def get_pred_for_case(case: str, iteration: int, threshold: int = 0.8) -> np.nda
     pred[pred > threshold] = 1
     pred[pred <= threshold] = 0
 
+    print("shape {}: ".format(case) + str(pred.shape))
     return pred
 
 
@@ -213,11 +218,16 @@ def get_bounding_boxes(pred, viz=False):
     bboxes = []
 
     for z in range(0, 220):
-        for x in range(0, 255):
-            for y in range(0, 255):
+        for x in range(0, 256):
+            for y in range(0, 256):
                 if pred[x][y][z] == 1 and not already_checked[x][y][z]:
                     cluster = find_cluster_start(pred, x, y, z)
-                    bboxes.append(compute_bounding_box(ax, cluster))
+                    non_zeros = np.count_nonzero(cluster)
+                    if non_zeros > 1:
+                        bboxes.append(compute_bounding_box(ax, cluster))
+
+    if viz:
+        plt.show()
 
     return bboxes
 
@@ -282,7 +292,7 @@ def bboxes_to_json(case, processing_time, bboxes):
     """
     json_output = {
         "dataset_id": case,
-        "processing_time": processing_time,
+        "processing_time_in_seconds": processing_time,
     }
     candidates = []
     for bbox in bboxes:
@@ -292,26 +302,72 @@ def bboxes_to_json(case, processing_time, bboxes):
     return json_output
 
 
+def get_cases(path):
+    """Get all cases in the given path.
+
+    Args:
+        path (str): path to the folder containing the cases.
+
+    Returns:
+        list[str]: list of cases.
+    """
+
+    def get_file_name(file_path=None):
+        # Some names are Axxx_L or Axxx_R. Those have to be included, otherwise names are onlz Axxx.
+        file_name = os.path.basename(file_path)[:6]
+        if file_name[4:] == "_L" or file_name[4:] == "_R" or file_name[4:] == "_M":
+            return file_name
+        return file_name[0:4]
+
+    h5_files = sorted(glob.glob(os.path.join(path, "*")))
+
+    cases = []
+    for file in h5_files:
+        cases.append(get_file_name(file))
+    return cases
+
+
 def main():
     iteration = 5
     cases = ["A121"]  # 'A120' 'A121' 'A123' 'A124' 'A126' 'A127' 'A129'
-    threshold = 0.8
-    viz = True
+    threshold = 0.5
+    viz = False
 
+    predictions_path = os.path.join(
+        "/home/borismeinardus/Aneurysm-Detection/data/predictions/exam",
+        f"iteration{iteration}",
+    )
+
+    cases = get_cases(predictions_path)
+    cases.remove("A036")  # A036 has wrong shape! (228, 256, 256)
+    cases.remove("A104")  # A104 leads to segmentation fault. Too deep recursion...
+    cases.remove("A144_L")  # A144_L has wrong shape! (221, 256, 256)
+    cases.remove("A144_M")  # A144_L has wrong shape! (221, 256, 256)
+    # A147 has wrong shape! (221, 256, 256)
+    # A149 has wrong shape! (221, 256, 256)
     json_output = {
         "username": "Bagel",
         "task_1_results": [],
     }
+
+    # sys.setrecursionlimit(40000)
+
+    cases = ["A104"]
+
     for case in cases:
         pred = get_pred_for_case(case, iteration, threshold)
+        if pred.shape != (256, 256, 220):
+            print(f"{case} has wrong shape!")
+            continue
         start = time.time()
         bboxes = get_bounding_boxes(pred, viz)
         processing_time = time.time() - start
         json_output["task_1_results"].append(
             bboxes_to_json(case, processing_time, bboxes)
         )
+        print("Got bounding boxes for case {}".format(case))
 
-    with open("bounding_box.json", "w") as f:
+    with open("bounding_box0.json", "w") as f:
         json.dump(json_output, f)
 
     if viz:
