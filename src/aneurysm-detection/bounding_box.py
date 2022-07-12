@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 import sys
 import os
 import json
+import nibabel as nib
+from scipy import ndimage as ndi
 
-sys.setrecursionlimit(50000)
-
-already_checked = np.full((256, 256, 220), False)
+sys.setrecursionlimit(20000)
 
 modify_array = [
     [1, 0, 0],
@@ -47,7 +47,7 @@ modify_array = [
 
 def get_pred_for_case(case: str, iteration: int, threshold: int = 0.9) -> np.ndarray:
     file = os.path.join(
-        "/home/borismeinardus/Aneurysm-Detection/data/predictions/exam",
+        "/Users/borismeinardus/Aneurysm-Detection/data/predictions/exam",
         "iteration{}/{}_predictions.h5".format(iteration, case),
     )
 
@@ -55,13 +55,34 @@ def get_pred_for_case(case: str, iteration: int, threshold: int = 0.9) -> np.nda
         pred = f["predictions"][:]
 
     pred = np.squeeze(pred, axis=0)
-    if pred.shape == (220, 256, 256):
+    if pred.shape != (256, 256, 220):
         # reshape ds from z, x, y to x, y, z
         pred = np.moveaxis(pred, 0, -1)
     pred[pred > threshold] = 1
     pred[pred <= threshold] = 0
 
-    print("shape {}: ".format(case) + str(pred.shape))
+    # transform pred into world coordinate system
+    image = nib.load(
+        os.path.join(
+            "/Users/borismeinardus/Aneurysm-Detection/data/test_set/",
+            "{}_orig.nii.gz".format(case),
+        )
+    )
+
+    affine = image.affine
+
+    pred_coordinates = np.where(pred == 1)
+
+    # pred_world_coordinates = ndi.affine_transform(pred, np.linalg.inv(affine))
+    pred_world_coordinates = ndi.affine_transform(pred, affine)
+
+    # new_pred = np.zeros(pred.shape)
+    # for voxel in zip(pred_coordinates[0], pred_coordinates[1], pred_coordinates[2]):
+    #     voxel = np.array(voxel)
+    #     voxel = ndi.affine_transform(voxel, np.linalg.inv(affine))
+    #     new_pred[voxel[0]][voxel[1]][voxel[2]] = 1
+
+    print("shape {}: {}".format(case, pred.shape))
     return pred
 
 
@@ -85,7 +106,7 @@ def drawBoundingBox(ax, rrc):
     ax.plot(rrc[0, [3, 7]], rrc[1, [3, 7]], rrc[2, [3, 7]], color="b", label="l")
 
 
-def find_cluster_start(pred, x, y, z):
+def find_cluster_start(pred, x, y, z, already_checked):
     """Initialize the recursive function to find the cluster starting with a given coordinate
 
     Args:
@@ -97,16 +118,16 @@ def find_cluster_start(pred, x, y, z):
     Returns:
         cluster (np.ndarray): the cluster that was found starting at (x, y, z)
     """
-    tmp_array = np.zeros((256, 256, 220))
+    tmp_array = np.zeros(pred.shape)
     tmp_array[x][y][z] = 1
     already_checked[x][y][z] = True
 
-    cluster = recursive_cluster(pred, tmp_array, x, y, z)
+    cluster = recursive_cluster(pred, tmp_array, x, y, z, already_checked)
 
     return cluster
 
 
-def recursive_cluster(pred, tmp_array, x, y, z):
+def recursive_cluster(pred, tmp_array, x, y, z, already_checked):
     """Recursive function to find the cluster starting with a given coordinate
 
     Args:
@@ -119,6 +140,8 @@ def recursive_cluster(pred, tmp_array, x, y, z):
     Returns:
         tmp_array (np.ndarray): current cluster
     """
+    pred_x, pred_y, pred_z = pred.shape
+
     for variant in modify_array:
         newx = x + variant[0]
         newy = y + variant[1]
@@ -126,17 +149,19 @@ def recursive_cluster(pred, tmp_array, x, y, z):
 
         if (
             newx >= 0
-            and newx <= 255
+            and newx < pred_x
             and newy >= 0
-            and newy <= 255
+            and newy < pred_y
             and newz >= 0
-            and newz <= 219
+            and newz < pred_z
         ):
             if pred[newx][newy][newz] == 1 and not already_checked[newx][newy][newz]:
                 tmp_array[newx][newy][newz] = 1
                 already_checked[newx][newy][newz] = True
 
-                tmp_array = recursive_cluster(pred, tmp_array, newx, newy, newz)
+                tmp_array = recursive_cluster(
+                    pred, tmp_array, newx, newy, newz, already_checked
+                )
 
     return tmp_array
 
@@ -193,7 +218,7 @@ def compute_bounding_box(ax, data):
     return rrc
 
 
-def get_bounding_boxes(pred, viz=False):
+def get_bounding_boxes(pred, already_checked, viz=False):
     """Get bounding boxes from prediction.
 
     Args:
@@ -217,11 +242,13 @@ def get_bounding_boxes(pred, viz=False):
 
     bboxes = []
 
-    for z in range(0, 220):
-        for x in range(0, 256):
-            for y in range(0, 256):
+    pred_x, pred_y, pred_z = pred.shape
+
+    for z in range(0, pred_z):
+        for x in range(0, pred_x):
+            for y in range(0, pred_y):
                 if pred[x][y][z] == 1 and not already_checked[x][y][z]:
-                    cluster = find_cluster_start(pred, x, y, z)
+                    cluster = find_cluster_start(pred, x, y, z, already_checked)
                     non_zeros = np.count_nonzero(cluster)
                     if non_zeros > 1:
                         bboxes.append(compute_bounding_box(ax, cluster))
@@ -264,17 +291,37 @@ def get_candidates_for_json(rrc: np.ndarray):
         (rrc[2, 2] + rrc[2, 0]) / 2,
     ]
 
+    # calculate extent in mm
+    # one voxel has a diameter of .25mm so we multiply the length of the vector by .25
+    # since we want the diameter of the bounding box we multiply the orthogonal offset vector by 2
     v_a = np.around(v_m[1] - v_m[0], 4)
+    v_a_extent = np.round(2 * np.linalg.norm(v_a) * 0.25, 4)
+    v_a_norm = np.round(v_a / np.linalg.norm(v_a), 4)
     v_b = np.around(v_m[2] - v_m[0], 4)
+    v_b_extent = np.round(2 * np.linalg.norm(v_b) * 0.25, 4)
+    v_b_norm = np.round(v_b / np.linalg.norm(v_b), 4)
     v_c = np.around(v_m[3] - v_m[0], 4)
+    v_c_extent = np.round(2 * np.linalg.norm(v_c) * 0.25, 4)
+    v_c_norm = np.round(v_c / np.linalg.norm(v_c), 4)
+
+    if v_a_extent == 0 or v_b_extent == 0 or v_c_extent == 0:
+        return None
 
     middle_point = np.around(v_m[0], 4)
 
     return {
         "position": middle_point.tolist(),
         "object_oriented_bounding_box": {
-            "extent": [1, 1, 1],
-            "orthogonal_offset_vectors": [v_a.tolist(), v_b.tolist(), v_c.tolist()],
+            "extent": [
+                v_a_extent,
+                v_b_extent,
+                v_c_extent,
+            ],
+            "orthogonal_offset_vectors": [
+                v_a_norm.tolist(),
+                v_b_norm.tolist(),
+                v_c_norm.tolist(),
+            ],
         },
     }
 
@@ -296,7 +343,8 @@ def bboxes_to_json(case, processing_time, bboxes):
     }
     candidates = []
     for bbox in bboxes:
-        candidates.append(get_candidates_for_json(bbox))
+        if get_candidates_for_json(bbox) is not None:
+            candidates.append(get_candidates_for_json(bbox))
     json_output["candidates"] = candidates
 
     return json_output
@@ -329,45 +377,36 @@ def get_cases(path):
 
 def main():
     iteration = 5
-    cases = ["A121"]  # 'A120' 'A121' 'A123' 'A124' 'A126' 'A127' 'A129'
-    threshold = 0.5
-    viz = False
+    threshold = 0.9
+    viz = True
 
     predictions_path = os.path.join(
-        "/home/borismeinardus/Aneurysm-Detection/data/predictions/exam",
+        "/Users/borismeinardus/Aneurysm-Detection/data/predictions/exam",
         f"iteration{iteration}",
     )
 
     cases = get_cases(predictions_path)
-    cases.remove("A036")  # A036 has wrong shape! (228, 256, 256)
     cases.remove("A104")  # A104 leads to segmentation fault. Too deep recursion...
-    cases.remove("A144_L")  # A144_L has wrong shape! (221, 256, 256)
-    cases.remove("A144_M")  # A144_L has wrong shape! (221, 256, 256)
-    # A147 has wrong shape! (221, 256, 256)
-    # A149 has wrong shape! (221, 256, 256)
+
     json_output = {
         "username": "Bagel",
         "task_1_results": [],
     }
 
-    # sys.setrecursionlimit(40000)
-
-    cases = ["A104"]
+    cases = ["A141"]
 
     for case in cases:
         pred = get_pred_for_case(case, iteration, threshold)
-        if pred.shape != (256, 256, 220):
-            print(f"{case} has wrong shape!")
-            continue
+        already_checked = np.full(pred.shape, False)
         start = time.time()
-        bboxes = get_bounding_boxes(pred, viz)
+        bboxes = get_bounding_boxes(pred, already_checked, viz)
         processing_time = time.time() - start
         json_output["task_1_results"].append(
             bboxes_to_json(case, processing_time, bboxes)
         )
         print("Got bounding boxes for case {}".format(case))
 
-    with open("bounding_box0.json", "w") as f:
+    with open("bounding_box_141_affine.json", "w") as f:
         json.dump(json_output, f)
 
     if viz:

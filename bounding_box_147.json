@@ -1,0 +1,222 @@
+{
+    "username": "Bagel",
+    "task_1_results": [
+        {
+            "dataset_id": "A147",
+            "processing_time_in_seconds": 61.155405044555664,
+            "candidates": [
+                {
+                    "position": [
+                        79.0,
+                        136.5,
+                        1.0
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            0.5567,
+                            0.1809,
+                            0.0
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                0.0,
+                                0.5257,
+                                -0.8507
+                            ],
+                            [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            [NaN, NaN, NaN
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        110.0405,
+                        112.3597,
+                        3.473
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            2.9363,
+                            1.4765,
+                            1.9312
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -0.9425,
+                                0.3255,
+                                -0.0756
+                            ],
+                            [
+                                -0.3175,
+                                -0.9483,
+                                0.0
+                            ],
+                            [
+                                0.1116,
+                                0.0935,
+                                -0.9893
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        135.1852,
+                        96.2867,
+                        3.9548
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            5.0178,
+                            3.3481,
+                            3.1449
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -0.8322,
+                                0.4727,
+                                0.2898
+                            ],
+                            [
+                                -0.506,
+                                -0.8625,
+                                0.0
+                            ],
+                            [
+                                -0.228,
+                                0.1848,
+                                -0.956
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        151.5925,
+                        85.9767,
+                        2.7702
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            3.0767,
+                            2.1057,
+                            1.8008
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -0.7529,
+                                0.6446,
+                                -0.1328
+                            ],
+                            [
+                                -0.6995,
+                                -0.7146,
+                                0.0
+                            ],
+                            [
+                                -0.2019,
+                                -0.4183,
+                                -0.8856
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        173.0,
+                        77.0,
+                        3.5
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            0.2127,
+                            0.4736,
+                            0.0
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                0.0,
+                                0.5257,
+                                0.8507
+                            ],
+                            [
+                                0.0,
+                                -1.0,
+                                0.0
+                            ],
+                            [NaN, NaN, NaN
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        62.1736,
+                        166.2472,
+                        32.9425
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            5.6425,
+                            1.9037,
+                            2.8844
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -0.9168,
+                                0.2187,
+                                0.3341
+                            ],
+                            [
+                                -0.5162,
+                                -0.8565,
+                                0.0
+                            ],
+                            [
+                                -0.0751,
+                                0.7273,
+                                -0.6822
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "position": [
+                        149.8532,
+                        253.5429,
+                        217.2925
+                    ],
+                    "object_oriented_bounding_box": {
+                        "extent": [
+                            2.1942,
+                            0.6142,
+                            1.1444
+                        ],
+                        "orthogonal_offset_vectors": [
+                            [
+                                -0.972,
+                                -0.0146,
+                                0.2347
+                            ],
+                            [
+                                -0.6872,
+                                0.7265,
+                                0.0
+                            ],
+                            [
+                                0.0436,
+                                0.9696,
+                                0.2408
+                            ]
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
