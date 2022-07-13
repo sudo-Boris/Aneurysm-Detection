@@ -61,27 +61,6 @@ def get_pred_for_case(case: str, iteration: int, threshold: int = 0.9) -> np.nda
     pred[pred > threshold] = 1
     pred[pred <= threshold] = 0
 
-    # transform pred into world coordinate system
-    image = nib.load(
-        os.path.join(
-            "/Users/borismeinardus/Aneurysm-Detection/data/test_set/",
-            "{}_orig.nii.gz".format(case),
-        )
-    )
-
-    affine = image.affine
-
-    pred_coordinates = np.where(pred == 1)
-
-    # pred_world_coordinates = ndi.affine_transform(pred, np.linalg.inv(affine))
-    pred_world_coordinates = ndi.affine_transform(pred, affine)
-
-    # new_pred = np.zeros(pred.shape)
-    # for voxel in zip(pred_coordinates[0], pred_coordinates[1], pred_coordinates[2]):
-    #     voxel = np.array(voxel)
-    #     voxel = ndi.affine_transform(voxel, np.linalg.inv(affine))
-    #     new_pred[voxel[0]][voxel[1]][voxel[2]] = 1
-
     print("shape {}: {}".format(case, pred.shape))
     return pred
 
