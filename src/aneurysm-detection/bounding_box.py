@@ -357,7 +357,7 @@ def get_cases(path):
 def main():
     iteration = 5
     threshold = 0.9
-    viz = True
+    viz = False
 
     predictions_path = os.path.join(
         "/Users/borismeinardus/Aneurysm-Detection/data/predictions/exam",
@@ -372,8 +372,6 @@ def main():
         "task_1_results": [],
     }
 
-    cases = ["A141"]
-
     for case in cases:
         pred = get_pred_for_case(case, iteration, threshold)
         already_checked = np.full(pred.shape, False)
@@ -385,7 +383,7 @@ def main():
         )
         print("Got bounding boxes for case {}".format(case))
 
-    with open("bounding_box_141_affine.json", "w") as f:
+    with open("bounding_box.json", "w") as f:
         json.dump(json_output, f)
 
     if viz:
