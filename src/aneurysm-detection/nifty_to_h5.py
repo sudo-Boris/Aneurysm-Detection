@@ -110,6 +110,8 @@ def h5_to_nifty(h5_files=None, target_path=None, threshold=0.9):
 
 
 def main():
+    #### Nifty to h5 ####
+
     ### Get raw and mask images from (in this case) /Aneurysm-Detection/data/training
     # filepath_training = os.path.join(os.getcwd(), "data", "training")
     # filepaths_raw = sorted(glob.glob(os.path.join(filepath_training, "*_orig.*")))
@@ -124,7 +126,8 @@ def main():
     ### Test if you can correctly read the data out of the hdf5 file.
     ### The test_read function reads the data the same way the 3DUnet implementation does.
     # raw, label = test_read(case="A003")
-    # print(raw)
+
+    #### h5 to nifty ####
 
     filepath_final_predictions_dir = os.path.join(
         os.getcwd(), "data", "predictions", "exam", "iteration5"
@@ -132,7 +135,6 @@ def main():
     filepath_final_predictions = sorted(
         glob.glob(os.path.join(filepath_final_predictions_dir, "*"))
     )
-    # filepaths_masks = sorted(glob.glob(os.path.join(filepath_training, "*_masks.*")))
 
     h5_to_nifty(
         filepath_final_predictions,

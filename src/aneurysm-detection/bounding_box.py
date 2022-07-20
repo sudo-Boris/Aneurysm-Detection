@@ -86,7 +86,7 @@ def drawBoundingBox(ax, rrc):
 
 
 def find_cluster_start(pred, x, y, z, already_checked):
-    """Initialize the recursive function to find the cluster starting with a given coordinate
+    """Initialize the recursive function to find the cluster (Aneurysm) starting with a given coordinate.
 
     Args:
         pred (np.ndarray): whole prediction for which to find cluster for.
@@ -107,17 +107,17 @@ def find_cluster_start(pred, x, y, z, already_checked):
 
 
 def recursive_cluster(pred, tmp_array, x, y, z, already_checked):
-    """Recursive function to find the cluster starting with a given coordinate
+    """Recursive function to find each cluster (Aneurysm) starting with a given coordinate.
 
     Args:
-        pred (np.ndarray): whole prediction for which to find cluster for.
-        tmp_array (np.ndarray): current cluster
+        pred (np.ndarray): whole prediction for which to find individual aneurysms (clusters).
+        tmp_array (np.ndarray): current cluster.
         x (int): x coordinate
         y (int): y coordinate
         z (int): z coordinate
 
     Returns:
-        tmp_array (np.ndarray): current cluster
+        tmp_array (np.ndarray): current cluster.
     """
     pred_x, pred_y, pred_z = pred.shape
 
@@ -158,7 +158,7 @@ def bbox_3D_2(centered_data):
 
 
 def compute_bounding_box(ax, data):
-    """Compute object oriented bounding box for one clustering
+    """Compute object oriented bounding box for one aneurysm
 
     Args:
         ax (fig.add_subplot(projection="3d")): axes to which to add current bounding box.
@@ -239,11 +239,11 @@ def get_bounding_boxes(pred, already_checked, viz=False):
 
 
 def get_candidates_for_json(rrc: np.ndarray):
-    """Compute middle point and orthogonal offset vectors for a candidate bounding box \
+    """Compute middle point, extent, and orthogonal offset vectors for a candidate bounding box \
         and return in correct json format.
 
     Args:
-        rrc (np.ndarray): Ooe bounding box in the form of a numpy array.
+        rrc (np.ndarray): One bounding box in the form of a numpy array.
 
     Returns:
         dict: json candidates entry for current bounding box in the form of a dictionary.
